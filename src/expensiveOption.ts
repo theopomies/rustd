@@ -37,21 +37,7 @@ import { Err, Ok, Result } from "./result.ts";
 * }
 * ```
 */
-export class Option<T> {
-  protected constructor(
-    private value?: T,
-  ) {}
-
-  /** Some value `T`  */
-  static Some<T>(value: T): Option<T> {
-    return new Option(value);
-  }
-
-  /** No value  */
-  static None<T>(): Option<T> {
-    return new Option();
-  }
-
+export interface Option<T> {
   /** Returns `true` if the option is a `Some` value.
    *
    * # Examples
@@ -64,9 +50,7 @@ export class Option<T> {
    * console.log(y.isSome()); // false
    * ```
    */
-  isSome(this: Option<T>): boolean {
-    return this.value != undefined;
-  }
+  isSome(this: Option<T>): boolean;
 
   /** Returns `true` if the option is a `None` value.
    *
@@ -80,9 +64,7 @@ export class Option<T> {
    * console.log(y.isNone()); // true
    * ```
    */
-  isNone(this: Option<T>): boolean {
-    return !this.isSome();
-  }
+  isNone(this: Option<T>): boolean;
 
   /** Returns `true` if the option is a `Some` value containing the given value.
    * (checked with the loose equalty operator `==`);
@@ -101,9 +83,7 @@ export class Option<T> {
    * console.log(x.contains(2)); // false
    * ```
    */
-  contains<U>(this: Option<T>, x: U | T): boolean {
-    return this.isSome() && this.value == x;
-  }
+  contains<U>(this: Option<T>, x: U | T): boolean;
 
   /** Returns the contained `Some` value.
    *
@@ -122,10 +102,7 @@ export class Option<T> {
    * y.expect("fruits are healthy"); // panics with `fruits are healthy`
    * ```
    */
-  expect(this: Option<T>, msg: string): T {
-    if (this.value == undefined) panic(msg);
-    return this.value;
-  }
+  expect(this: Option<T>, msg: string): T;
 
   /** Returns the contained `Some` value.
    *
@@ -146,9 +123,7 @@ export class Option<T> {
    * console.log(y.unwrap()); // panics
    * ```
    */
-  unwrap(this: Option<T>): T {
-    return this.expect("called `Option.unwrap()` on a `None` value");
-  }
+  unwrap(this: Option<T>): T;
 
   /** Returns the contained `Some` value or a provided default.
    *
@@ -163,9 +138,7 @@ export class Option<T> {
    * console.log(None().unwrapOr("bike")); // "bike"
    * ```
    */
-  unwrapOr(this: Option<T>, defaultValue: T): T {
-    return this.value ?? defaultValue;
-  }
+  unwrapOr(this: Option<T>, defaultValue: T): T;
 
   /** Returns the contained `Some` value or computes it from a callback.
    *
@@ -177,9 +150,7 @@ export class Option<T> {
    * console.log(None().unwrapOrElse(() => 2 * k)); // 20
    * ```
    */
-  unwrapOrElse(this: Option<T>, f: () => T): T {
-    return this.value ?? f();
-  }
+  unwrapOrElse(this: Option<T>, f: () => T): T;
 
   /** Maps an `Option<T>` to `Option<U>` by applying a function to a contained value.
    *
@@ -197,12 +168,7 @@ export class Option<T> {
    * console.log(maybeSomeLen.contains(13)); // true
    * ```
    */
-  map<U>(this: Option<T>, f: (arg: T) => U): Option<U> {
-    if (this.value == undefined) {
-      return None();
-    }
-    return Some(f(this.value));
-  }
+  map<U>(this: Option<T>, f: (arg: T) => U): Option<U>;
 
   /** Returns the provided default result (if none),
    * or applies a function to the contained value (if any).
@@ -221,9 +187,7 @@ export class Option<T> {
    * console.log(y.mapOr(42, (v) => v.length)); // 42
    * ```
    */
-  mapOr<U>(this: Option<T>, defaultValue: U, f: (arg: T) => U): U {
-    return this.map(f).unwrapOr(defaultValue);
-  }
+  mapOr<U>(this: Option<T>, defaultValue: U, f: (arg: T) => U): U;
 
   /** Computes a default function result (if none), or
    * applies a different function to the contained value (if any).
@@ -240,12 +204,7 @@ export class Option<T> {
    * console.log(y.mapOrElse(() => 2  * k, (v) => v.length)); // 42
    * ```
    */
-  mapOrElse<U>(this: Option<T>, defaultValue: () => U, f: (arg: T) => U): U {
-    if (this.value == undefined) {
-      return defaultValue();
-    }
-    return f(this.value);
-  }
+  mapOrElse<U>(this: Option<T>, defaultValue: () => U, f: (arg: T) => U): U;
 
   /** Transforms the `Option<T>` into a `Result<T, E>`, mapping `Some(v)` to
    * `Ok(v)` and `None` to `Err(err)`.
@@ -264,12 +223,7 @@ export class Option<T> {
    * console.log(y.okOr(0).isErr()); // true
    * ```
    */
-  okOr<E>(this: Option<T>, error: E): Result<T, E> {
-    if (this.value == undefined) {
-      return Err(error);
-    }
-    return Ok(this.value);
-  }
+  okOr<E>(this: Option<T>, error: E): Result<T, E>;
 
   /** Transforms the `Option<T>` into a `Result<T, E>`, mapping `Some(v)` to
    * `Ok(v)` and `None` to `Err(err())`.
@@ -284,12 +238,7 @@ export class Option<T> {
    * console.log(y.okOrElse(() => 0).containsErr(0)); //true
    * ```
    */
-  okOrElse<E>(this: Option<T>, error: () => E): Result<T, E> {
-    if (this.value == undefined) {
-      return Err(error());
-    }
-    return Ok(this.value);
-  }
+  okOrElse<E>(this: Option<T>, error: () => E): Result<T, E>;
 
   /** Returns an iterator over the possibly contained value.
    *
@@ -307,13 +256,7 @@ export class Option<T> {
    * }
    * ```
    */
-  iter(this: Option<T>): Iterable<T> {
-    return this[Symbol.iterator]();
-  }
-
-  *[Symbol.iterator](this: Option<T>): Iterable<T> {
-    if (this.value != undefined) yield this.value;
-  }
+  iter(this: Option<T>): Iterable<T>;
 
   /** Returns `None` if the option is `None`, otherwise returns `optb`.
    *
@@ -337,10 +280,7 @@ export class Option<T> {
    * console.log(x.and(y).isNone()); // true
    * ```
    */
-  and<U>(this: Option<T>, optb: Option<U>): Option<U> {
-    if (this.isNone()) return None();
-    return optb;
-  }
+  and<U>(this: Option<T>, optb: Option<U>): Option<U>;
 
   /** Returns `None` if the option is `None`, otherwise calls `f` with the
    * wrapped value and returns the result.
@@ -363,10 +303,7 @@ export class Option<T> {
    * console.log(None().andThen(sq).andThen(sq).isNone()); // true
    * ```
    */
-  andThen<U>(this: Option<T>, optb: (arg: T) => Option<U>): Option<U> {
-    if (this.value == undefined) return None();
-    return optb(this.value);
-  }
+  andThen<U>(this: Option<T>, optb: (arg: T) => Option<U>): Option<U>;
 
   /** Returns `None` if the option is `None`, otherwise calls `predicate`
    * with the wrapped value and returns:
@@ -387,10 +324,7 @@ export class Option<T> {
    * console.log(Some(4).filter(isEven).contains(4)); //true
    * ```
    */
-  filter(this: Option<T>, predicate: (arg: T) => boolean): Option<T> {
-    if (this.value == undefined || !predicate(this.value)) return None();
-    return Some(this.value);
-  }
+  filter(this: Option<T>, predicate: (arg: T) => boolean): Option<T>;
 
   /** Returns the option if it contains a value, otherwise returns `optb`.
    *
@@ -418,10 +352,7 @@ export class Option<T> {
    * console.log(x.or(y).isNone()); // true
    * ```
    */
-  or(this: Option<T>, optb: Option<T>): Option<T> {
-    if (this.isSome()) return this;
-    return optb;
-  }
+  or(this: Option<T>, optb: Option<T>): Option<T>;
 
   /** Returns the option if it contains a value, otherwise calls `f` and
    * returns the result.
@@ -441,10 +372,7 @@ export class Option<T> {
    * console.log(None().orElse(nobody).isNone()); // true
    * ```
    */
-  orElse(this: Option<T>, optb: () => Option<T>): Option<T> {
-    if (this.isSome()) return this;
-    return optb();
-  }
+  orElse(this: Option<T>, optb: () => Option<T>): Option<T>;
 
   /** Returns `Some` if exactly one of `self`, `optb` is `Some`, otherwise returns `None`.
    *
@@ -468,11 +396,7 @@ export class Option<T> {
    * console.log(x.xor(y).isNone()); // true
    * ```
    */
-  xor(this: Option<T>, optb: Option<T>): Option<T> {
-    if (this.isSome() && optb.isNone()) return this;
-    if (this.isNone()) return optb;
-    return None();
-  }
+  xor(this: Option<T>, optb: Option<T>): Option<T>;
 
   /** Inserts `value` into the option then returns it.
    *
@@ -491,10 +415,7 @@ export class Option<T> {
    * console.log(opt.unwrap()); // { x: false }
    * ```
    */
-  insert(this: Option<T>, value: T): T {
-    this.value = value;
-    return this.value;
-  }
+  insert(this: Option<T>, value: T): T;
 
   /** Inserts `value` into the option if it is `None`, then
    * returns it.
@@ -517,10 +438,7 @@ export class Option<T> {
    * console.log(x.unwrap()); // { v: 7 };
    * ```
    */
-  getOrInsert(this: Option<T>, value: T): T {
-    if (this.value == undefined) return this.insert(value);
-    return this.value;
-  }
+  getOrInsert(this: Option<T>, value: T): T;
 
   /** Inserts a value computed from `f` into the option if it is `None`,
    * then returns it.
@@ -540,10 +458,7 @@ export class Option<T> {
    * console.log(x.unwrap()); // { v: 7 }
    * ```
    */
-  getOrInsertWith(this: Option<T>, f: () => T): T {
-    if (this.value == undefined) return this.insert(f());
-    return this.value;
-  }
+  getOrInsertWith(this: Option<T>, f: () => T): T;
 
   /** Takes the value out of the option, leaving a `None` in its place.
    *
@@ -561,11 +476,7 @@ export class Option<T> {
    * console.log(y.isNone()); // true
    * ```
    */
-  take(this: Option<T>): Option<T> {
-    const newOption = new Option(this.value);
-    this.value = undefined;
-    return newOption;
-  }
+  take(this: Option<T>): Option<T>;
 
   /** Replaces the actual value in the option by the value given in parameter,
    * returning the old value if present,
@@ -585,11 +496,7 @@ export class Option<T> {
    * console.log(old.isNone()); // true
    * ```
    */
-  replace(this: Option<T>, value: T): Option<T> {
-    const oldOption = new Option(this.value);
-    this.value = value;
-    return oldOption;
-  }
+  replace(this: Option<T>, value: T): Option<T>;
 
   /** Zips `self` with another `Option`.
    *
@@ -607,12 +514,7 @@ export class Option<T> {
    * console.log(x.zip(z).isNone()); // true
    * ```
    */
-  zip<U>(this: Option<T>, other: Option<U>): Option<[T, U]> {
-    if (this.value == undefined || other.value == undefined) {
-      return None();
-    }
-    return Some([this.value, other.value]);
-  }
+  zip<U>(this: Option<T>, other: Option<U>): Option<[T, U]>;
 
   /** Zips `self` and another `Option` with function `f`.
    *
@@ -641,12 +543,7 @@ export class Option<T> {
     this: Option<T>,
     other: Option<U>,
     f: (lhs: T, rhs: U) => R,
-  ): Option<R> {
-    if (this.value == undefined || other.value == undefined) {
-      return None();
-    }
-    return Some(f(this.value, other.value));
-  }
+  ): Option<R>;
 
   /** Transposes an `Option` of a `Result` into a `Result` of an `Option`.
    *
@@ -664,11 +561,7 @@ export class Option<T> {
    * y = y.transpose();
    * ```
    */
-  transpose<E>(this: Option<Result<T, E>>): Result<Option<T>, E> {
-    if (this.value == undefined) return Ok(None());
-    if (this.value.isOk()) return Ok(Some(this.value.unwrap()));
-    return Err(this.value.unwrapErr());
-  }
+  transpose<E>(this: Option<Result<T, E>>): Result<Option<T>, E>;
 
   /** Converts from `Option<Option<T>>` to `Option<T>`
    *
@@ -695,17 +588,190 @@ export class Option<T> {
    * console.log(x.flatten().flatten().contains(6)); // true;
    * ```
    */
-  flatten(this: Option<Option<T>>): Option<T> {
-    if (this.value instanceof Option) {
-      return this.value;
-    }
-    return this as unknown as Option<T>;
-  }
-
-  toString(this: Option<T>): string {
-    if (this.isNone()) return "None";
-    return `Some(${this.value})`;
-  }
+  flatten(this: Option<Option<T>>): Option<T>;
+  [Symbol.iterator](): Iterable<T>;
 }
 
-export const { Some, None } = Option;
+class FlattenHack<T> {
+}
+function Option<S>(value?: S): Option<S> {
+  return new (class OptionImpl<T extends S> extends FlattenHack<T>
+    implements Option<S> {
+    constructor() {
+      super();
+    }
+
+    isSome(this: Option<T>): boolean {
+      return value != undefined;
+    }
+
+    isNone(this: Option<T>): boolean {
+      return !this.isSome();
+    }
+
+    contains<U>(this: Option<T>, x: U | T): boolean {
+      return this.isSome() && value == x;
+    }
+
+    expect(this: Option<T>, msg: string): S {
+      if (value == undefined) panic(msg);
+      return value;
+    }
+
+    unwrap(this: Option<T>): S {
+      return this.expect("called `Option.unwrap()` on a `None` value");
+    }
+
+    unwrapOr(this: Option<T>, defaultValue: T): S {
+      return value ?? defaultValue;
+    }
+
+    unwrapOrElse(this: Option<T>, f: () => T): S {
+      return value ?? f();
+    }
+
+    map<U>(this: Option<T>, f: (arg: S) => U): Option<U> {
+      if (value == undefined) {
+        return None();
+      }
+      return Some(f(value));
+    }
+
+    mapOr<U>(this: Option<T>, defaultValue: U, f: (arg: T) => U): U {
+      return this.map(f).unwrapOr(defaultValue);
+    }
+
+    mapOrElse<U>(this: Option<T>, defaultValue: () => U, f: (arg: S) => U): U {
+      if (value == undefined) {
+        return defaultValue();
+      }
+      return f(value);
+    }
+
+    okOr<E>(this: Option<T>, error: E): Result<S, E> {
+      if (value == undefined) {
+        return Err(error);
+      }
+      return Ok(value);
+    }
+
+    okOrElse<E>(this: Option<T>, error: () => E): Result<S, E> {
+      if (value == undefined) {
+        return Err(error());
+      }
+      return Ok(value);
+    }
+
+    iter(this: Option<T>): Iterable<S> {
+      return this[Symbol.iterator]();
+    }
+
+    *[Symbol.iterator](this: Option<T>): Iterable<S> {
+      if (value != undefined) yield value;
+    }
+
+    and<U>(this: Option<T>, optb: Option<U>): Option<U> {
+      if (this.isNone()) return None();
+      return optb;
+    }
+
+    andThen<U>(this: Option<T>, optb: (arg: S) => Option<U>): Option<U> {
+      if (value == undefined) return None();
+      return optb(value);
+    }
+
+    filter(this: Option<T>, predicate: (arg: S) => boolean): Option<S> {
+      if (value == undefined || !predicate(value)) return None();
+      return Some(value);
+    }
+
+    or(this: Option<T>, optb: Option<T>): Option<T> {
+      if (this.isSome()) return this;
+      return optb;
+    }
+
+    orElse(this: Option<T>, optb: () => Option<T>): Option<T> {
+      if (this.isSome()) return this;
+      return optb();
+    }
+
+    xor(this: Option<T>, optb: Option<T>): Option<T> {
+      if (this.isSome() && optb.isNone()) return this;
+      if (this.isNone()) return optb;
+      return None();
+    }
+
+    insert(this: Option<T>, newValue: T): S {
+      value = newValue;
+      return value;
+    }
+
+    getOrInsert(this: Option<T>, value: T): T {
+      if (value == undefined) return this.insert(value);
+      return value;
+    }
+
+    getOrInsertWith(this: Option<T>, f: () => T): S {
+      if (value == undefined) return this.insert(f());
+      return value;
+    }
+
+    take(this: Option<T>): Option<S> {
+      const newOption = Option(value);
+      value = undefined;
+      return newOption;
+    }
+
+    replace(this: Option<T>, newValue: T): Option<S> {
+      const oldOption = Option(value);
+      value = newValue;
+      return oldOption;
+    }
+
+    zip<U>(this: Option<T>, other: Option<U>): Option<[S, U]> {
+      if (value == undefined || other.isNone()) {
+        return None();
+      }
+      return Some([value, other.unwrap()]);
+    }
+
+    zipWith<U, R>(
+      this: Option<T>,
+      other: Option<U>,
+      f: (lhs: S, rhs: U) => R,
+    ): Option<R> {
+      if (value == undefined || other.isNone() == undefined) {
+        return None();
+      }
+      return Some(f(value, other.unwrap()));
+    }
+
+    transpose<E>(this: Option<Result<T, E>>): Result<Option<T>, E> {
+      if (value == undefined || !(value instanceof Result)) return Ok(None());
+      if (value.isOk()) return Ok(Some(value.unwrap()));
+      return Err(value.unwrapErr());
+    }
+
+    flatten(this: Option<Option<T>>): Option<S> {
+      if (value != undefined && value instanceof FlattenHack) {
+        return value as unknown as Option<S>;
+      }
+      return Option(value);
+    }
+
+    toString(this: Option<T>): string {
+      if (this.isNone()) return "None";
+      return `Some(${value})`;
+    }
+  })();
+}
+
+/** Some value `T`  */
+export function Some<T>(value: T): Option<T> {
+  return Option(value);
+}
+
+/** No value  */
+export function None<T>(): Option<T> {
+  return Option();
+}

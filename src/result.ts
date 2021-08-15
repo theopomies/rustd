@@ -153,6 +153,11 @@ export class Result<T, E> {
     }
     return new Result(this.result);
   }
+
+  toString(this: Result<T, E>): string {
+    if (this.result.tag == ResultTag.Ok) return `Ok(${this.result.value})`;
+    return `Err(${this.result.err})`;
+  }
 }
 
 export const { Ok, Err } = Result;
