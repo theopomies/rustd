@@ -656,7 +656,7 @@ export const { Ok, Err } = Result;
  * being the Error instance thrown by the function.
  *
  * Basic usage:
- *
+ * ```ts
  * function divide(n: number, d: number): number {
  *    if (d == 0) throw `${n} / ${d} cannot be computed, denominator must be non-zero.`;
  *    return n / d;
@@ -671,6 +671,7 @@ export const { Ok, Err } = Result;
  * let badResult = safeDivision(42, 0);
  * console.log(badResult.isErr()); // true
  * console.error(badResult.unwrapErr()); // "42 / 0 cannot be computed, denominator must be non-zero."
+ * ```
  */
 // deno-lint-ignore ban-types
 export function resultify(f: Function): Function {
